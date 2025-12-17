@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NITHIN — Offline AI Support Assistant (HTML/CSS/JS)</title>
+<style>
+  :root {
+    --bg: #f0f8ff;
+    --card: #ffffff;
+    --text: #2d3748;
+    --muted: #718096;
+    --accent: #4299e1;
+    --shadow: 0 4px 32px rgba(66,153,225,0.15), 0 1.5px 7px rgba(0,0,0,0.09);
+    --transition: 0.3s cubic-bezier(.38,.76,.45,1.07);
+  }
+  .dark {
+    --bg: #1a202c;
+    --card: #2d3748;
+    --text: #e2e8f0;
+    --accent: #63b3ed;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, Arial;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    align-items: stretch;
+    transition: background 0.4s, color 0.4s;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03));
+    padding: 18px;
+    border-right: 1px solid rgba(0,0,0,0.06);
+    box-shadow: var(--shadow);
+    transition: box-shadow var(--transition), background var(--transition);
+  }
+
+  .brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    animation: slideInLeft 0.7s cubic-bezier(.77,0,.175,1);
+  }
+
+  .avatar-lg {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  p.role {
+    margin: 4px 0 12px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .menu {
+    margin-top: 8px;
+  }
+
+  .menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0;
+    margin: 6px 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.19s, box-shadow 0.19s;
+    box-shadow: none;
+    will-change: background;
+  }
+
+  .menu button:hover {
+    background: rgba(66,153,225,0.08);
+  }
+
+  .menu button:active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .faq-search {
+    margin-top: 12px;
+  }
+
+  .faq-search input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .faq-list {
+    margin-top: 10px;
+    max-height: 220px;
+    overflow: auto;
+  }
+
+  .faq-item {
+    background: rgba(0,0,0,0.03);
+    padding: 8px;
+    border-radius: 8px;
+    margin: 6px 0;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+
+  .faq-item:hover {
+    background: rgba(66,153,225,0.10);
+  }
+
+  .small {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Main area */
+  #main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-card {
+    width: 420px;
+    max-width: calc(100% - 40px);
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 14px;
+    margin: 20px;
+    animation: popUp 0.6s;
+    transition: background 0.29s, box-shadow var(--transition);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar-sm {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  .header .meta {
+    flex: 1;
+  }
+
+  .header h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .header p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* metrics */
+  .metrics {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .metric {
+    background: rgba(0,0,0,0.03);
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  /* Chat area */
+  #chatWindow {
+    height: 380px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.04);
+    margin-top: 12px;
+    padding: 12px;
+    overflow: auto;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.01));
+  }
+
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin: 8px 0;
+    animation: fadeUp 0.18s ease;
+  }
+
+  .msg-row.user {
+    justify-content: flex-end;
+  }
+
+  .bubble {
+    max-width: 73%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.3;
+    animation: fadeChat 0.38s ease;
+    transition: background 0.23s, color 0.23s;
+    position: relative;
+    will-change: background, color;
+  }
+
+  .bubble.bot {
+    background: linear-gradient(180deg, #e6f0ff, #f0f8ff);
+    color: var(--text);
+    border: 1px solid rgba(66,153,225,0.06);
+  }
+
+  .bubble.bot:after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: -6px;
+    top: 8px;
+    bottom: 8px;
+    width: 7px;
+    border-radius: 8px;
+    background: var(--accent);
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bubble.user {
+    background: linear-gradient(180deg, #dbeeff, #cbe5ff);
+    color: var(--text);
+  }
+
+  .msg-author {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .avatar-msg {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* typing loader */
+  .typing {
+    display: inline-block;
+    width: 48px;
+  }
+
+  .dot {
+    display: inline-block;
+    margin: 0 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    opacity: 0.6;
+    animation: blink 1s infinite;
+  }
+
+  .dot:nth-child(2) {
+    animation-delay: .15s;
+  }
+
+  .dot:nth-child(3) {
+    animation-delay: .3s;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0.12;
+      transform: translateY(2px);
+    }
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* input area */
+  .composer {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: center;
+  }
+
+  .composer input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.06);
+    background: #f8fafd;
+    transition: border 0.15s, background 0.25s;
+  }
+
+  .composer input[type="text"]:focus {
+    border: 1.5px solid var(--accent);
+    background: #fff;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 0;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 1px 2.5px 0 rgba(66,153,225,0.10);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+
+  .btn:active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .btn.secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(66,153,225,0.12);
+  }
+
+  .btn.secondary:active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .smalllink {
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  /* Emoji picker */
+  .emoji-picker {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    z-index: 1000;
+    display: none;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    animation: bounceIn 0.2s;
+  }
+
+  .emoji-picker .emoji {
+    cursor: pointer;
+    font-size: 20px;
+    margin: 2px;
+    transition: transform 0.16s;
+  }
+
+  .emoji-picker .emoji:hover {
+    transform: scale(1.2) rotate(-9deg);
+  }
+
+  /* footer tools */
+  .tools {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .left-tools {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  /* responsive */
+  @media (max-width: 880px) {
+    #sidebar {
+      display: none;
+    }
+    .chat-card {
+      width: 95%;
+    }
+  }
+
+  /* Animations */
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-70px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes popUp {
+    from {
+      transform: scale(0.93) translateY(40px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeChat {
+    from {
+      transform: scale(0.97) translateY(15px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @keyframes bounceIn {
+    from {
+      transform: translateY(15px) scale(0.96);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar" aria-hidden="false">
+  <div class="brand">
+    <div class="avatar-lg">R</div>
+    <div>
+      <h1>NITHIN</h1>
+      <p class="role">Virtual HR Support Assistant</p>
+    </div>
+  </div>
+
+  <div class="menu">
+    <button onclick="showSection('home')">🏠 Home</button>
+    <button onclick="showSection('faqs')">📚 FAQs</button>
+    <button onclick="showSection('tasks')">📝 Tasks</button>
+    <button onclick="showSection('contact')">✉️ Contact HR</button>
+    <button onclick="showSection('survey')">📊 Survey</button>
+    <button onclick="showSection('analytics')">📈 Analytics</button>
+    <button onclick="showSection('settings')">⚙️ Settings</button>
+  </div>
+
+  <div class="faq-search">
+    <input id="faqSearch" placeholder="Search FAQs..." oninput="filterFaqs()" />
+    <div class="faq-list" id="faqList"></div>
+  </div>
+
+  <div style="margin-top:12px">
+    <div class="small">Quick actions</div>
+    <div style="margin-top:8px; display:flex; gap:8px;">
+      <button class="btn" onclick="clearChat()">Clear Chat</button>
+      <button class="btn secondary" onclick="exportChatTxt()">Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="chat-card" role="main">
+    <div class="header">
+      <div class="avatar-sm">R</div>
+      <div class="meta">
+        <h2>NITHIN — HR Assistant</h2>
+        <p class="small">Ask about leave, benefits, working hours, or upload a resume for quick checks.</p>
+      </div>
+    </div>
+
+    <div class="metrics" id="metrics">
+      <div class="metric" id="qCount">Questions: 0</div>
+      <div class="metric" id="escalations">Escalations: 0</div>
+      <div class="metric" id="lastVisit">Last visit: —</div>
+    </div>
+
+    <div id="chatWindow" aria-live="polite"></div>
+
+    <div class="composer" style="margin-top:8px;">
+      <input id="userInput" type="text" placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendMessage()" />
+      <div class="controls">
+        <button class="btn" onclick="sendMessage()">Send</button>
+        <button class="btn secondary" onclick="startVoice()">🎤</button>
+        <button class="btn secondary" onclick="toggleEmojiPicker()">😊</button>
+      </div>
+    </div>
+
+    <div class="emoji-picker" id="emojiPicker">
+      <!-- Emojis will be added here dynamically -->
+    </div>
+
+    <div class="tools">
+      <div class="left-tools">
+        <label class="smalllink">
+          <input type="file" id="fileInput" style="display:none" onchange="handleFile(event)" />
+          <span onclick="document.getElementById('fileInput').click();" style="cursor:pointer">📎 Upload file</span>
+        </label>
+        <span class="small">•</span>
+        <span class="smalllink" onclick="exportChatTxt()">⬇️ Export TXT</span>
+        <span class="small">•</span>
+        <span class="smalllink" onclick="printChat()">🖨️ Print / Save PDF</span>
+      </div>
+      <div>
+        <span class="smalllink" onclick="setLanguage('en')">English</span>
+        <span class="small">•</span>
+        <span class="smalllink" onclick="setLanguage('hi')">हिंदी</span>
+        <span class="small">•</span>
+        <label class="smalllink" style="margin-right:8px">Theme</label>
+        <button class="btn secondary" onclick="toggleTheme()">Toggle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========================
+   Data & FAQ
+   ======================== */
+const FAQ_DB = {
+  "leave policy": "Employees are eligible for 24 paid leaves per year. Leaves must be requested via the HR portal at least 3 days before planned leave.",
+  "working hours": "Standard working hours are 9 AM - 6 PM, Monday to Friday. Flexible hours available upon manager approval.",
+  "benefits": "We provide health insurance, annual bonuses, and wellness reimbursements.",
+  "salary": "Salary details are confidential. For salary-related queries please contact [payroll@company.com](mailto:payroll@company.com).",
+  "contact hr": "Reach HR at [hr@company.com](mailto:hr@company.com) or call +91-XXXXXXXXXX during business hours.",
+
+  // Hindi translations
+  "अवकाश नीति": "कर्मचारी प्रति वर्ष 24 भुगतान योग्य अवकाश के लिए पात्र हैं। अवकाश के लिए HR पोर्टल के माध्यम से योजना बनाए जाने से कम से कम 3 दिन पहले आवेदन करना आवश्यक है।",
+  "कार्य घंटे": "मानक कार्य घंटे सोमवार से शुक्रवार, सुबह 9 बजे से शाम 6 बजे तक हैं। प्रबंधक की स्वीकृति पर लचीले घंटे उपलब्ध हैं।",
+  "लाभ": "हम स्वास्थ्य बीमा, वार्षिक बोनस और वेलनेस रियायतें प्रदान करते हैं।",
+  "वेतन": "वेतन की जानकारी गोपनीय है। वेतन से संबंधित किसी भी प्रश्न के लिए कृपया [payroll@company.com](mailto:payroll@company.com) से संपर्क करें।",
+  "HR से संपर्क करें": "HR से संपर्क करने के लिए [hr@company.com](mailto:hr@company.com) पर ईमेल करें या व्यवसाय के घंटों के दौरान +91-XXXXXXXXXX पर कॉल करें।"
+};
+
+/* Language support */
+const LANGUAGES = {
+  en: {
+    welcome: "Hello! I'm NITHIN — your virtual HR assistant.",
+    fallback: "I couldn't find a precise answer. Here are suggestions:",
+    escalate: "This looks like a complex query. I am escalating it to a human support agent.",
+    upload: "File uploaded. (This demo only analyzes plain .txt / .json files offline.)",
+    analysis: "File analysis complete. Word count: {words}. Detected keywords: {keywords}.",
+    tasks: "Tasks: {list}",
+    taskAdd: "Task added: {task}",
+    taskRemove: "Task removed: {task}",
+    survey: "Please rate your experience (1-5):",
+    analytics: "Analytics: Questions: {q}, Escalations: {e}, Sentiment: {s}",
+    feedback: "Thank you for your feedback!",
+    sentiment: { positive: "Positive", negative: "Negative", neutral: "Neutral" },
+    emoji: {
+      happy: "I see you're feeling happy! 😊",
+      sad: "I'm sorry you're feeling down. 😔",
+      angry: "I understand your frustration. 😠",
+      neutral: "Thanks for sharing. 🙂"
+    }
+  },
+  hi: {
+    welcome: "नमस्ते! मैं NITHIN हूँ — आपका वर्चुअल HR सहायक।",
+    fallback: "मुझे सटीक उत्तर नहीं मिला। यहां कुछ सुझाव हैं:",
+    escalate: "यह एक जटिल प्रश्न लगता है। मैं इसे मानव सहायता एजेंट को भेज रहा हूँ।",
+    upload: "फ़ाइल अपलोड की गई। (यह डेमो केवल सादे .txt / .json फ़ाइलों का विश्लेषण करता है।)",
+    analysis: "फ़ाइल विश्लेषण पूरा हुआ। शब्द संख्या: {words}। पहचाने गए कीवर्ड: {keywords}।",
+    tasks: "कार्य: {list}",
+    taskAdd: "कार्य जोड़ा गया: {task}",
+    taskRemove: "कार्य हटाया गया: {task}",
+    survey: "कृपया अपना अनुभव रेट करें (1-5):",
+    analytics: "विश्लेषण: प्रश्न: {q}, एस्केलेशन: {e}, भावना: {s}",
+    feedback: "आपके फीडबैक के लिए धन्यवाद!",
+    sentiment: { positive: "सकारात्मक", negative: "नकारात्मक", neutral: "तटस्थ" },
+    emoji: {
+      happy: "मैं देख रहा हूँ कि आप खुश हैं! 😊",
+      sad: "मुझे खेद है कि आप दुखी हैं। 😔",
+      angry: "मैं आपकी नाराजगी समझता हूँ। 😠",
+      neutral: "साझा करने के लिए धन्यवाद। 🙂"
+    }
+  }
+};
+
+/* persisted state keys */
+const STORAGE_KEY = "nithin_chat_v3";
+const TASKS_KEY = "nithin_tasks_v2";
+const SURVEY_KEY = "nithin_survey_v1";
+const ANALYTICS_KEY = "nithin_analytics_v1";
+
+/* runtime state */
+let state = {
+  messages: [],
+  qCount: 0,
+  escalations: 0,
+  lang: 'en',
+  sentiment: { positive: 0, negative: 0, neutral: 0 }
+};
+let tasks = [];
+let surveyResponses = [];
+
+/* Initialize UI */
+const chatWindow = document.getElementById('chatWindow');
+const userInput = document.getElementById('userInput');
+const faqList = document.getElementById('faqList');
+const qCountEl = document.getElementById('qCount');
+const escEl = document.getElementById('escalations');
+const lastVisitEl = document.getElementById('lastVisit');
+const emojiPicker = document.getElementById('emojiPicker');
+
+/* Emoji list */
+const emojis = ["😀", "😁", "😂", "😃", "😄", "😅", "😆", "😉", "😊", "😋", "😌", "😍", "😎", "😏", "😐", "😑", "😒", "😓", "😔", "😕", "😖", "😗", "😘", "😙", "😚", "😛", "😜", "😝", "😞", "😟", "😠", "😡", "😢", "😣", "😤", "😥", "😦", "😧", "😨", "😩", "😪", "😫", "😬", "😭", "😮", "😯", "😰", "😱", "😲", "😳", "😴", "😵", "😶", "😷", "🙁", "🙂", "🙃", "🙄", "🤐", "🤑", "🤒", "🤓", "🤔", "🤕", "🤗", "🤘", "🤐", "🤑", "🤒", "🤓", "🤔", "🤕", "🤗", "🤘"];
+
+/*---------- Utility: Levenshtein distance for fuzzy matching ----------*/
+function levenshtein(a,b){
+  a = a.toLowerCase(); b = b.toLowerCase();
+  const m = a.length, n = b.length;
+  if(m===0) return n; if(n===0) return m;
+  let dp = Array.from({length:m+1},(_,i)=>i);
+  for(let j=1;j<=n;j++){
+    let prev = dp[0];
+    dp[0] = j;
+    for(let i=1;i<=m;i++){
+      let cur = dp[i];
+      let cost = a[i-1]===b[j-1]?0:1;
+      dp[i] = Math.min(dp[i]+1, dp[i-1]+1, prev+cost);
+      prev = cur;
+    }
+  }
+  return dp[m];
+}
+function similarityScore(a,b){
+  const dist = levenshtein(a,b);
+  const maxLen = Math.max(a.length, b.length) || 1;
+  return 1 - (dist / maxLen); // 0..1
+}
+
+/*---------- Fuzzy match to FAQ ----------*/
+function fuzzyMatchQuery(text){
+  text = text.trim().toLowerCase();
+  if(!text) return null;
+  let bestKey = null, bestScore=-1;
+  for(const key in FAQ_DB){
+    const score = similarityScore(text, key);
+    if(score>bestScore){ bestScore = score; bestKey = key; }
+    if(key.includes(text) || text.includes(key)) { bestScore = 1; bestKey = key; break; }
+  }
+  return bestScore >= 0.45 ? {key:bestKey, answer:FAQ_DB[bestKey], score:bestScore} : null;
+}
+
+/* ---------- Render message ---------- */
+function renderMessage(msg){
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + (msg.who==='user' ? 'user' : 'bot');
+  // avatar
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar-msg';
+  avatar.textContent = msg.who==='user' ? 'Y' : 'R';
+  // bubble
+  const wrap = document.createElement('div');
+  const author = document.createElement('div');
+  author.className = 'msg-author';
+  author.textContent = msg.who==='user' ? 'You' : 'NITHIN';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (msg.who==='user' ? 'user' : 'bot');
+  bubble.innerHTML = escapeHtml(msg.text).replace(/\n/g,'<br>');
+  // assemble
+  if(msg.who==='user'){
+    wrap.appendChild(bubble);
+    row.appendChild(wrap);
+    row.appendChild(avatar);
+  } else {
+    row.appendChild(avatar);
+    wrap.appendChild(author);
+    wrap.appendChild(bubble);
+    row.appendChild(wrap);
+  }
+  chatWindow.appendChild(row);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+/* escape HTML */
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- Typing indicator ---------- */
+function showTypingIndicator(){
+  const typingRow = document.createElement('div');
+  typingRow.id = 'typingRow';
+  typingRow.className = 'msg-row bot';
+  const avatar = document.createElement('div'); avatar.className='avatar-msg'; avatar.textContent='R';
+  const wrap = document.createElement('div');
+  const bubble = document.createElement('div'); bubble.className='bubble bot';
+  const t = document.createElement('span'); t.className='typing';
+  t.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  bubble.appendChild(t);
+  wrap.appendChild(bubble);
+  typingRow.appendChild(avatar); typingRow.appendChild(wrap);
+  chatWindow.appendChild(typingRow);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+function hideTypingIndicator(){
+  const el = document.getElementById('typingRow');
+  if(el) el.remove();
+}
+
+/* ---------- Emoji picker ---------- */
+function toggleEmojiPicker() {
+  if (emojiPicker.style.display === 'block') {
+    emojiPicker.style.display = 'none';
+  } else {
+    emojiPicker.style.display = 'block';
+    renderEmojiPicker();
+  }
+}
+function renderEmojiPicker() {
+  emojiPicker.innerHTML = '';
+  emojis.forEach(emoji => {
+    const span = document.createElement('span');
+    span.className = 'emoji';
+    span.textContent = emoji;
+    span.onclick = () => insertEmoji(emoji);
+    emojiPicker.appendChild(span);
+  });
+}
+function insertEmoji(emoji) {
+  const input = document.getElementById('userInput');
+  input.value += emoji;
+  input.focus();
+  emojiPicker.style.display = 'none';
+}
+
+/* ---------- Sentiment analysis ---------- */
+function analyzeSentiment(text) {
+  const pos = ['good', 'great', 'happy', 'excellent', 'awesome', 'satisfied', 'सुखी', 'खुश', 'अच्छा', 'उत्कृष्ट'];
+  const neg = ['bad', 'terrible', 'sad', 'unhappy', 'worst', 'unsatisfied', 'दुखी', 'खराब', 'असंतुष्ट'];
+  const low = text.toLowerCase();
+  let score = 0;
+  for(const w of pos) if(low.includes(w)) score++;
+  for(const w of neg) if(low.includes(w)) score--;
+  return score > 0 ? 'positive' : (score < 0 ? 'negative' : 'neutral');
+}
+
+/* ---------- Emoji sentiment analysis ---------- */
+function analyzeEmojiSentiment(text) {
+  const happy = ['😀', '😁', '😂', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😌', '😍', '😎', '😏', '🙂', '🙃', '🤗', '🤑'];
+  const sad = ['😔', '😕', '😖', '😞', '😟', '😢', '😣', '😥', '😦', '😧', '😨', '😩', '😪', '😫', '😭', '😮', '😯', '😰', '😱', '😲', '😳', '😴', '😵', '😶', '🙁'];
+  const angry = ['😠', '😡', '😤'];
+  for(const e of happy) if(text.includes(e)) return 'happy';
+  for(const e of sad) if(text.includes(e)) return 'sad';
+  for(const e of angry) if(text.includes(e)) return 'angry';
+  return 'neutral';
+}
+
+/* ---------- Core: reply generation (simple offline logic) ---------- */
+function getBotReply(userText){
+  const lang = LANGUAGES[state.lang];
+  // 1. direct exact FAQ
+  const k = userText.trim().toLowerCase();
+  if(FAQ_DB[k]) return {text:FAQ_DB[k], escalated:false};
+
+  // 2. fuzzy match
+  const matched = fuzzyMatchQuery(userText);
+  if(matched) return {text: matched.answer + (matched.score < 0.75 ? "\n\n(Showing closest FAQ match.)" : ""), escalated:false};
+
+  // 3. if user asks to contact HR
+  const contactKeywords = ['human', 'escalate', 'manager', 'supervisor', 'contact hr', 'speak to'];
+  for(const kw of contactKeywords){
+    if(userText.toLowerCase().includes(kw)) return {text: lang.escalate + " HR will reach out to you at [hr@company.com](mailto:hr@company.com).", escalated:true};
+  }
+
+  // 4. language change (chat command)
+  if(userText.toLowerCase().includes('switch to hindi') || userText.toLowerCase().includes('hindi me')) {
+    state.lang = 'hi';
+    persistState();
+    return {text: lang.welcome, escalated:false};
+  }
+  if(userText.toLowerCase().includes('switch to english') || userText.toLowerCase().includes('english me')) {
+    state.lang = 'en';
+    persistState();
+    return {text: lang.welcome, escalated:false};
+  }
+
+  // 5. task management
+  if(userText.toLowerCase().includes('add task')) {
+    const task = userText.replace(/add task/i, '').trim();
+    if(task) {
+      tasks.push(task);
+      persistTasks();
+      return {text: lang.taskAdd.replace('{task}', task), escalated:false};
+    }
+  }
+  if(userText.toLowerCase().includes('remove task')) {
+    const task = userText.replace(/remove task/i, '').trim();
+    const index = tasks.findIndex(t => t.toLowerCase() === task.toLowerCase());
+    if(index !== -1) {
+      tasks.splice(index, 1);
+      persistTasks();
+      return {text: lang.taskRemove.replace('{task}', task), escalated:false};
+    }
+  }
+  if(userText.toLowerCase().includes('show tasks')) {
+    return {text: lang.tasks.replace('{list}', tasks.length ? tasks.join(', ') : 'none'), escalated:false};
+  }
+
+  // 6. survey
+  if(userText.toLowerCase().includes('survey') || userText.toLowerCase().includes('feedback')) {
+    return {text: lang.survey, escalated:false};
+  }
+  if(userText.match(/^[1-5]$/)) {
+    surveyResponses.push(parseInt(userText));
+    persistSurvey();
+    return {text: lang.feedback, escalated:false};
+  }
+
+  // 7. analytics
+  if(userText.toLowerCase().includes('analytics') || userText.toLowerCase().includes('show analytics')) {
+    const s = lang.sentiment[state.sentiment[analyzeSentiment(userText)]];
+    return {text: lang.analytics.replace('{q}', state.qCount).replace('{e}', state.escalations).replace('{s}', s), escalated:false};
+  }
+
+  // 8. emoji sentiment
+  const emojiSentiment = analyzeEmojiSentiment(userText);
+  if (emojiSentiment !== 'neutral') {
+    return {text: lang.emoji[emojiSentiment], escalated:false};
+  }
+
+  // 9. fallback (suggest options)
+  const fallback = lang.fallback + "\n" +
+    "• Try: 'leave policy', 'benefits', 'working hours'.\n" +
+    "• Or type 'contact hr' to escalate.\n" +
+    "Would you like me to escalate this to HR?";
+  return {text:fallback, escalated:false};
+}
+
+/* ---------- sendMessage flow ---------- */
+async function sendMessage(){
+  const text = userInput.value.trim();
+  if(!text) return;
+  addUserMessage(text);
+  userInput.value = '';
+  showTypingIndicator();
+  await sleep(600 + Math.min(text.length*10, 1000));
+  hideTypingIndicator();
+  const reply = getBotReply(text);
+  addBotMessage(reply.text, reply.escalated);
+  // update sentiment
+  const sentiment = analyzeSentiment(text);
+  state.sentiment[sentiment]++;
+  persistState();
+}
+
+/* ---------- add messages (update state & UI & storage) ---------- */
+function addUserMessage(text){
+  const msg = {who:'user', text, time:Date.now()};
+  state.messages.push(msg); state.qCount += 1;
+  persistState(); renderMessage(msg); updateMetrics();
+}
+function addBotMessage(text, escalated=false){
+  const msg = {who:'bot', text, time:Date.now()};
+  state.messages.push(msg); if(escalated) state.escalations += 1;
+  persistState(); renderMessage(msg); updateMetrics();
+  speakText(text);
+}
+
+/* ---------- Text-to-Speech ---------- */
+function speakText(text){
+  if(!('speechSynthesis' in window)) return;
+  const ut = new SpeechSynthesisUtterance(text.replace(/\n/g,'. '));
+  ut.lang = state.lang === 'hi' ? 'hi-IN' : 'en-US';
+  const voices = window.speechSynthesis.getVoices();
+  if(voices && voices.length) ut.voice = voices.find(v=>v.lang.includes(state.lang === 'hi' ? 'hi' : 'en')) || voices[0];
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(ut);
+}
+
+/* ---------- voice -> input ---------- */
+function startVoice(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition) { alert('Speech recognition not supported in this browser.'); return; }
+  const rec = new SpeechRecognition();
+  rec.lang = state.lang === 'hi' ? 'hi-IN' : 'en-US';
+  rec.interimResults = false; rec.maxAlternatives = 1;
+  rec.onresult = (e) => { const t = e.results[0][0].transcript; userInput.value = t; };
+  rec.onerror = ()=>{/*ignore*/};
+  rec.start();
+}
+
+/* ---------- File upload handling (basic) ---------- */
+function handleFile(e){
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const name = f.name.toLowerCase();
+  if(name.endsWith('.txt') || name.endsWith('.json')){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const text = ev.target.result;
+      addUserMessage('[Uploaded file] ' + f.name);
+      const analysis = analyzeTextFile(text);
+      addBotMessage(analysis, false);
+    };
+    reader.readAsText(f);
+  } else {
+    addUserMessage('[Uploaded file] ' + f.name);
+    addBotMessage(LANGUAGES[state.lang].upload, false);
+  }
+  e.target.value = '';
+}
+function analyzeTextFile(text){
+  const keywords = ['javascript','react','node','kotlin','java','python','ml','machine learning','experience','years','bachelor','master'];
+  const low = text.toLowerCase();
+  let found = [];
+  for(const kw of keywords) if(low.includes(kw)) found.push(kw);
+  const lang = LANGUAGES[state.lang];
+  let res = lang.analysis.replace('{words}', text.split(/\s+/).filter(Boolean).length).replace('{keywords}', found.length ? found.join(', ') : 'none');
+  if(found.length) res += '\n' + (state.lang === 'en' ? 'This looks like a technical resume — consider highlighting years of experience and projects.' : 'यह एक तकनीकी रिज्यूमे जैसा लगता है — वर्षों का अनुभव और परियोजनाएं हाइलाइट करें।');
+  return res;
+}
+
+/* ---------- helpers ---------- */
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+/* ---------- storage ---------- */
+function persistState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem('nithin_last_visit', new Date().toLocaleString());
+  }catch(e){}
+}
+function persistTasks(){
+  try{
+    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  }catch(e){}
+}
+function persistSurvey(){
+  try{
+    localStorage.setItem(SURVEY_KEY, JSON.stringify(surveyResponses));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if(data && data.messages) state = data;
+  }catch(e){}
+  try{
+    const taskData = JSON.parse(localStorage.getItem(TASKS_KEY) || 'null');
+    if(taskData && Array.isArray(taskData)) tasks = taskData;
+  }catch(e){}
+  try{
+    const surveyData = JSON.parse(localStorage.getItem(SURVEY_KEY) || 'null');
+    if(surveyData && Array.isArray(surveyData)) surveyResponses = surveyData;
+  }catch(e){}
+  const lv = localStorage.getItem('nithin_last_visit') || '—';
+  lastVisitEl.textContent = 'Last visit: ' + lv;
+}
+function clearChat(){
+  if(!confirm('Clear chat history?')) return;
+  // Animate fade-out, then clear
+  chatWindow.style.transition = "opacity 0.4s";
+  chatWindow.style.opacity = "0";
+  setTimeout(()=>{
+    state = {messages:[], qCount:0, escalations:0, lang:'en', sentiment: {positive:0,negative:0,neutral:0}};
+    tasks = [];
+    surveyResponses = [];
+    persistState();
+    persistTasks();
+    persistSurvey();
+    renderAll();
+    chatWindow.style.opacity = "1";
+  }, 400);
+}
+
+/* ---------- render all ---------- */
+function renderAll(){
+  chatWindow.innerHTML = '';
+  for(const m of state.messages) renderMessage(m);
+  updateMetrics();
+}
+
+/* ---------- metrics ---------- */
+function updateMetrics(){
+  qCountEl.textContent = 'Questions: ' + (state.qCount || 0);
+  escEl.textContent = 'Escalations: ' + (state.escalations || 0);
+  lastVisitEl.textContent = 'Last visit: ' + (localStorage.getItem('nithin_last_visit') || '—');
+}
+
+/* ---------- export / print ---------- */
+function exportChatTxt(){
+  let txt = state.messages.map(m => {
+    const who = m.who==='user' ? 'You' : 'nithin';
+    const d = new Date(m.time).toLocaleString();
+    return `[${d}] ${who}: ${m.text.replace(/\n/g,' ')}`
+  }).join('\n\n');
+  const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'nithin-chat.txt'; a.click();
+  URL.revokeObjectURL(url);
+}
+function printChat(){
+  const w = window.open('','_blank','width=700,height=800');
+  const html = `
+    <html><head><title>NITHIN Chat</title>
+    <style>body{font-family:Arial;padding:20px} .msg{margin-bottom:12px} .bot{color:#4299e1} .user{color:#333}</style>
+    </head><body>
+    <h2>NITHIN Chat Export</h2>
+    ${state.messages.map(m => `<div class="msg ${m.who}"><strong>${m.who==='user'?'You':'NITHIN'}</strong> <em>${new Date(m.time).toLocaleString()}</em><div>${escapeHtml(m.text).replace(/\n/g,'<br>')}</div></div>`).join('')}
+    </body></html>`;
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=> w.print(), 600);
+}
+
+/* ---------- sidebar FAQ rendering & filter ---------- */
+function populateFaqList(filter=''){
+  faqList.innerHTML = '';
+  for(const k in FAQ_DB){
+    if(!filter || k.toLowerCase().includes(filter.toLowerCase()) || FAQ_DB[k].toLowerCase().includes(filter.toLowerCase())){
+      const el = document.createElement('div'); el.className='faq-item';
+      el.innerHTML = `<strong>${k}</strong><div class="small">${FAQ_DB[k].slice(0,120)}${FAQ_DB[k].length>120?'...':''}</div>`;
+      el.onclick = ()=> { userInput.value = k; userInput.focus(); };
+      faqList.appendChild(el);
+    }
+  }
+}
+function filterFaqs(){ populateFaqList(document.getElementById('faqSearch').value); }
+
+/* ---------- nav / sections (simple) ---------- */
+function showSection(name){
+  if(name==='faqs') document.getElementById('faqSearch').focus();
+  if(name==='contact') { userInput.value = 'contact hr'; userInput.focus(); }
+  if(name==='survey') { userInput.value = 'survey'; userInput.focus(); }
+  if(name==='analytics') { userInput.value = 'analytics'; userInput.focus(); }
+}
+
+/* ---------- theme toggle ---------- */
+function toggleTheme(){
+  document.body.classList.toggle('dark');
+}
+
+/* ---------- language switch function ---------- */
+function setLanguage(lang) {
+  state.lang = lang;
+  persistState();
+  addBotMessage(LANGUAGES[lang].welcome, false);
+}
+
+/* ---------- onload init ---------- */
+function welcome(){
+  loadState();
+  renderAll();
+  populateFaqList();
+  if(!state.messages || state.messages.length===0){
+    addBotMessage(LANGUAGES[state.lang].welcome + " You can ask about leave policy, benefits, working hours, or upload a resume for a quick offline scan. Try: 'leave policy' or 'benefits'. To switch language, type: 'switch to hindi' or 'switch to english'.", false);
+  } else {
+    addBotMessage("Welcome back! Resuming your last session.", false);
+  }
+  updateMetrics();
+}
+window.addEventListener('load', welcome);
+
+/* ---------- attach small UI shortcuts ---------- */
+document.addEventListener('visibilitychange', ()=> {
+  if(document.visibilityState==='hidden') persistState();
+});
+</script>
+</body>
+</html>
